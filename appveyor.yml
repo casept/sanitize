@@ -1,0 +1,19 @@
+---
+version: build-{build}.{branch}
+platform:
+  - x64
+  - x86
+clone_folder: c:\gopath\src\github.com\casept/sanitize
+environment:
+  GOPATH: c:\gopath
+
+install:
+  - echo %PATH%
+  - echo %GOPATH%
+  - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
+  - go version
+  - go env
+
+test_script:
+  - go test -v .
+...
