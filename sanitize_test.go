@@ -5,18 +5,18 @@ import (
 	"testing"
 )
 
-func TestIsSane(t *testing.T) {
-	var tc = []struct {
-		path string
-		sane bool
-	}{
-		{"../../../", false},
-		{"/etc/passwd", false},
-		{"../etc/passwd/", false},
-		{"testdir/cat/catpicture", true},
-		{"./testdir/cat/catpicture", true},
-	}
+var tc = []struct {
+	path string
+	sane bool
+}{
+	{"../../../", false},
+	{"/etc/passwd", false},
+	{"../etc/passwd/", false},
+	{"testdir/cat/catpicture", true},
+	{"./testdir/cat/catpicture", true},
+}
 
+func TestIsSane(t *testing.T) {
 	for _, tt := range tc {
 		rootPath, err := filepath.Abs("testdir/")
 		if err != nil {
@@ -37,5 +37,26 @@ func TestIsSaneAbsOnly(t *testing.T) {
 	_, err := IsSane(rootPath, "./")
 	if err == nil {
 		t.Error("Did not get error for supplying a relative root path")
+	}
+}
+
+func TesErrorIfNotSane(t *testing.T) {
+	for _, tt := range tc {
+		rootPath, err := filepath.Abs("testdir/")
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = ErrorIfNotSane(rootPath, tt.path)
+		switch err.(type) {
+		case nil:
+			if tt.sane == false {
+				t.Errorf("expected error to be returned for unsanitary path %v, did not get one", tt.path)
+			}
+		case PathNotSaneError:
+			if tt.sane == true {
+				t.Errorf("did not expect PathNotSaneError, got one for path %v", tt.path)
+			}
+		}
+
 	}
 }
